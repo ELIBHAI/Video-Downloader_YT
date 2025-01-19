@@ -8,7 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const downloadPath = path.join(os.homedir(), 'Downloads');
+// Use temporary directory for file downloads in Vercel
+const downloadPath = path.join(os.tmpdir(), 'Downloads');
 
 app.post('/download', async (req, res) => {
   const { url, type } = req.body;
@@ -38,11 +39,12 @@ app.post('/download', async (req, res) => {
 
   try {
     const output = await ytdlp(url, formatOptions);
-    res.json({ message: `Download complete: ${output.filename}`, downloadPath });
+    res.json({ message: `Download complete: ${output}`, downloadPath });
   } catch (err) {
     console.error('Download failed:', err.message);
     res.status(500).json({ error: 'Failed to download', details: err.message });
   }
 });
 
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
